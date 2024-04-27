@@ -6,7 +6,6 @@ import numpy as np
 import os
 import pandas as pd
 import pyproj
-import scipy.stats as stats
 
 # -- USER VARIABLES
 # ESPG code for local projection
@@ -98,26 +97,31 @@ raw_df.iloc[0, raw_df.columns.get_loc('TrackDistCum')] = 0
 raw_df['DistOrigin'] = euclidian_distance(raw_df['x'], raw_df.iloc[0]['x'], raw_df['y'], raw_df.iloc[0]['y'])
 
 # Quality check
-# Set all Quality flag to 0
-raw_df['Quality'] = 0
-raw_df.loc[raw_df['SnowDepth'] < 0, 'Quality'] = 1
+def quality_check(raw_df, lower_cal=lower_cal, upper_cal=upper_cal):
 
-# Look for lower and upper calibration value
-raw_df['Calibration'] = None
-raw_df.loc[raw_df['SnowDepth'] < lower_cal, 'Calibration'] = 'L'
-raw_df.loc[upper_cal < raw_df['SnowDepth'], 'Calibration'] = 'U'
-# Look for typical calibration pattern 'LU', 'UL', 'ULU', 'LUL', ...
-# TODO: to be implemented
+    # Set all Quality flag to 0
+    raw_df['Quality'] = 0
+    raw_df.loc[raw_df['SnowDepth'] < 0, 'Quality'] = 1
 
-# If distance between consecutive points is smaller than a third of the median distance, the measurement may have been
-# taken at the same location
-d_median = raw_df['TrackDist'].median()
-raw_df.loc[raw_df['TrackDist'] < d_median / 3, 'Quality'] = 2
+    # Look for lower and upper calibration value
+    raw_df['Calibration'] = None
+    raw_df.loc[raw_df['SnowDepth'] < lower_cal, 'Calibration'] = 'L'
+    raw_df.loc[upper_cal < raw_df['SnowDepth'], 'Calibration'] = 'U'
+    # Look for typical calibration pattern 'LU', 'UL', 'ULU', 'LUL', ...
+    # TODO: to be implemented
 
-# If time difference between two consecutive points is lower than 1 second, the second measurement could be a double
-# strike
-raw_df.loc[raw_df['Datetime'].diff() < dt.timedelta(0, 1), 'Quality'] = 3
+    # If distance between consecutive points is smaller than a third of the median distance, the measurement may have been
+    # taken at the same location
+    d_median = raw_df['TrackDist'].median()
+    raw_df.loc[raw_df['TrackDist'] < d_median / 3, 'Quality'] = 2
 
+    # If time difference between two consecutive points is lower than 1 second, the second measurement could be a double
+    # strike
+    raw_df.loc[raw_df['Datetime'].diff() < dt.timedelta(0, 1), 'Quality'] = 3
+
+    return raw_df
+
+raw_df = quality_check(raw_df)
 # Reorganize headers
 raw_df = raw_df[[col for col in raw_df.columns if col not in drop_header]]
 
@@ -128,24 +132,6 @@ raw_df = raw_df[header_order]
 raw_df.to_csv(out_file, index=False)
 print(output_fn)
 
-def hs_stats_f(Y):
-    hs_stats = {}
-    hs_stats['avg'] = stats.tmean(Y)
-    hs_stats['med'] = np.median(Y)
-    hs_stats['max'] = stats.tmax(Y)
-    hs_stats['maxloc'] = np.where(Y == hs_stats['max'])[0]
-    hs_stats['min'] = stats.tmin(Y)
-    hs_stats['minloc'] = np.where(Y == hs_stats['min'])[0]
-    hs_stats['sdev'] = stats.tstd(Y)  # Standard deviation
-    hs_stats['adev'] = np.sum(np.abs((Y - np.mean(Y))))/len(Y)
-    hs_stats['sem'] = stats.tsem(Y)  # Standard error of mean
-    hs_stats['rms'] = np.sqrt(np.sum(Y**2)/len(Y))  # Root mean square
-    hs_stats['skew'] = stats.skew(Y, bias=False)
-    hs_stats['kurt'] = stats.kurtosis(Y, bias=False)
-    return hs_stats
-
-hs_stats_f(raw_df['SnowDepth'])
-hs_stats_f(raw_df['TrackDist'])
 
 # Data status plot
 # Move origin points to x0, y0

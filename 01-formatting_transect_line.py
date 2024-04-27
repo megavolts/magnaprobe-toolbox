@@ -4,12 +4,18 @@ import matplotlib.gridspec as gridspec
 import numpy as np
 import pandas as pd
 import os
+import scipy.stats as stats
+
+# Magnaprobe calibration value
+lower_cal = 0.02  # m
+upper_cal = 1.18  # m
 
 # Line length in m
 line_l = 200
 
 # Point spacing in m
 point_d = 1
+plot_origin_flag = False
 
 # WITH geopandas
 #raw_file = '/mnt/data/UAF-data/raw_0/SALVO/20240417-ICE/armmagnaprobe-200m-20240417/salvo_arm_magnaprobe_200m_a1_geo1_20240417.csv'
@@ -52,23 +58,30 @@ raw_df['linear distance'] = raw_df['distance'].cumsum()
 raw_df['distance from origin'] = euclidian_distance(raw_df['x'], raw_df.iloc[0].x, raw_df['y'], raw_df.iloc[0].y)
 
 # Check if cleanup was correct
-def flagging(raw_df):
-    # Data Cleaner
-    raw_df['quality'] = 0
-    raw_df.loc[raw_df['Snow Depth'] < 0, 'quality'] = 1
+def quality_check(raw_df, lower_cal=lower_cal, upper_cal=upper_cal):
+    # Set all Quality flag to 0
+    raw_df['Quality'] = 0
+    raw_df.loc[raw_df['SnowDepth'] < 0, 'Quality'] = 1
 
-    # Look for measurements made too close to each other. Here the threshold is defined as 1/3 of the median distance \
-    # between two consecutive points
-    d_median = raw_df['distance'].median()
-    raw_df.loc[raw_df['distance'] < d_median / 3, 'quality'] = 2
+    # Look for lower and upper calibration value
+    raw_df['Calibration'] = None
+    raw_df.loc[raw_df['SnowDepth'] < lower_cal, 'Calibration'] = 'L'
+    raw_df.loc[upper_cal < raw_df['SnowDepth'], 'Calibration'] = 'U'
+    # Look for typical calibration pattern 'LU', 'UL', 'ULU', 'LUL', ...
+    # TODO: to be implemented
 
-    # consecutive time is smaller than 1 seconds
-    import datetime as dt
-    raw_df.loc[raw_df['datetime'].diff() < dt.timedelta(0, 1), 'quality'] = 3
+    # If distance between consecutive points is smaller than a third of the median distance, the measurement may have been
+    # taken at the same location
+    d_median = raw_df['TrackDist'].median()
+    raw_df.loc[raw_df['TrackDist'] < d_median / 3, 'Quality'] = 2
+
+    # If time difference between two consecutive points is lower than 1 second, the second measurement could be a double
+    # strike
+    raw_df.loc[raw_df['Datetime'].diff() < dt.timedelta(0, 1), 'Quality'] = 3
 
     return raw_df
 
-raw_df = flagging(raw_df)
+raw_df = quality_check(raw_df)
 if len(raw_df) > 201:
     print('Too many points: N=%.0f' %len(raw_df))
 elif len(raw_df) < 201:
@@ -95,11 +108,15 @@ else:
     name = '200 m transect'
 
 # Map data
-raw_df['x0'] = raw_df['x'] - raw_df.iloc[0]['x']
-raw_df['y0'] = raw_df['y'] - raw_df.iloc[0]['y']
-snow_depth_scale = 1.2
-z0 = cm.davos(raw_df['Snow Depth']/snow_depth_scale)
+if plot_origin_flag:
+    raw_df['x0'] = raw_df['x'] - raw_df.iloc[0]['x']
+    raw_df['y0'] = raw_df['y'] - raw_df.iloc[0]['y']
+else:
+    raw_df['x0'] = raw_df['x']
+    raw_df['y0'] = raw_df['y']
 
+snow_depth_scale = raw_df['SnowDepth'].max()-raw_df['SnowDepth'].min()
+z0 = cm.davos(raw_df['SnowDepth']/snow_depth_scale)
 # Figure
 nrows, ncols = 2, 1
 w_fig, h_fig = 8, 11
@@ -107,8 +124,8 @@ fig = plt.figure(figsize=[w_fig, h_fig])
 gs1 = gridspec.GridSpec(nrows, ncols, height_ratios=[1, 1], width_ratios=[1])
 ax = [[fig.add_subplot(gs1[0, 0])], [fig.add_subplot(gs1[1, 0])]]
 ax = np.array(ax)
-ax[0, 0].plot(raw_df['linear distance'], raw_df['Snow Depth'], color='steelblue')
-ax[0, 0].fill_between(raw_df['linear distance'], raw_df['Snow Depth'], [0]*len(raw_df), color='lightsteelblue')
+ax[0, 0].plot(raw_df['linear distance'], raw_df['SnowDepth'], color='steelblue')
+ax[0, 0].fill_between(raw_df['linear distance'], raw_df['SnowDepth'], [0]*len(raw_df), color='lightsteelblue')
 
 ax[0, 0].set_xlabel('Distance along the transect (m)')
 ax[0, 0].set_ylabel('Snow depth (m)')
