@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "magnaprobe-toolbox"
+version = "2024.0.0"
+dependencies = [
+  "cmcrameri",
+  "datetime",
+  "matplotlib",
+  "numpy",
+  "scipy",
+  "pint",
+  "pint-pandas"
+]
+
+requires-python = ">=3.8"
+authors = [
+  {name = "Marc Oggier", email = "marc.oggier@megavolts.ch"},
+]
+maintainers = [
+  {name = "Marc Oggier", email = "marc.oggier@megavolts.ch"},
+]
+description = "Toolbox to parse and analyse SnowHydro(TM) magnaprobe data"
+readme = "README.md"
+license = {file = "LICENSE.txt"}
+keywords = ["magnaprobe", "snow", "snow depth"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Programming Language :: Python"
+]
