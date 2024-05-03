@@ -13,10 +13,10 @@ def data(raw_df, out_fp, display=True, header_order=header_order, drop_header=Tr
     :return:
     """
     raw_df.columns = [c[0].upper() + c[1:] for c in raw_df.columns]
-    if not drop_header:
-        header_order = [col for col in header_order if col in header_order] + [col for col in raw_df.columns if col not in header_order]
+    if drop_header:
+        header_order = [col for col in header_order if col in raw_df.columns]
     else:
-        pass
+        header_order = [col for col in header_order if col in raw_df.columns] + [col for col in raw_df.columns if col not in header_order]
     raw_df = raw_df[header_order]
     raw_df.to_csv(out_fp, index=False)
     if display:

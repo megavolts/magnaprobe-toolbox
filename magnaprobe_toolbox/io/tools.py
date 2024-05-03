@@ -205,6 +205,8 @@ def compute_distance(raw_df, origin_pt=None):
     else:
         logger.error('TODO: compute_distance not defined')
 
+    # TODO: if previous point is missing, compute with the last known coordiante, aka filter nas row out
+    # USE 2040417-ICE
     raw_df['TrackDist'] = euclidian_distance(raw_df['X'], raw_df['X'].shift(), raw_df['Y'], raw_df['Y'].shift())
     raw_df.iloc[0, raw_df.columns.get_loc('TrackDist')] = 0
     # Compute cumulative sum of distance between two consecutive points

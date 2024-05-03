@@ -18,8 +18,18 @@ plot_origin_flag = True
 # Data filename
 qc_fp = '/mnt/data/UAF-data/working_a/SALVO/20240417-ICE/magnaprobe/salvo_ice_line_magnaprobe-geo1_20240417.a2.csv'
 qc_fp = '/mnt/data/UAF-data/working_a/SALVO/20240417-ICE/magnaprobe/salvo_ice_line_magnaprobe-geo1_20240417.a3.csv'
+qc_fp = '/mnt/data/UAF-data/working_a/SALVO/20240418-BEO/magnaprobe/salvo_beo_line_magnaprobe-geodel_20240418.a2.csv'
+qc_fp = '/mnt/data/UAF-data/working_a/SALVO/20240418-BEO/magnaprobe/salvo_beo_line_magnaprobe-geo2_20240418.a2.csv'
+qc_fp = '/mnt/data/UAF-data/working_a/SALVO/20240419-ARM/magnaprobe/salvo_arm_line_magnaprobe-geodel_20240419.a2.csv'
+qc_fp = '/mnt/data/UAF-data/working_a/SALVO/20240420-BEO/magnaprobe/salvo_beo_line_magnaprobe-geodel_20240420.a2.csv'
+qc_fp = '/mnt/data/UAF-data/working_a/SALVO/20240421-ICE/magnaprobe/salvo_ice_line_magnaprobe-geodel_20240421.a2.csv'
+qc_fp = '/mnt/data/UAF-data/working_a/SALVO/20240421-ICE/magnaprobe/salvo_ice_line_magnaprobe-geodel_20240421.a4.csv'
 
 qc_data = mt.load.qc_data(qc_fp)
+# check direction
+if qc_data.iloc[-1]['Longitude'] > qc_data.iloc[0]['Longitude']:
+    qc_data = qc_data.iloc[::-1]
+
 qc_data = mt.tools.compute_distance(qc_data)
 qc_data = mt.tools.all_check(qc_data)
 
@@ -38,7 +48,6 @@ if len(qc_data) < 201:
     logger.warning('Data point(s) are missing. Examine exported file %s, and insert nan-filled missing row' %output_fp.split('/')[-1])
     if len(qc_data[qc_data['Quality'] > 6]) > 0:
         print('Cleaning is still needed')
-
 elif len(qc_data) > 201:
     # Generate output_filename
     output_fp = mt.io.output_filename(qc_fp)
@@ -47,6 +56,9 @@ elif len(qc_data) > 201:
     if len(qc_data[qc_data['Quality'] > 6]) > 0:
         print('Cleaning is still needed')
 else:
+    # Populate 'LineLocation' with 0, 1, 2, ... 200 distance array
+    qc_data['LineLocation'] = np.arange(0, 201, 1)
+
     # Generate output_filename
     output_fp = mt.io.output_filename(qc_fp)
     mt.export.data(qc_data, output_fp)
@@ -65,7 +77,11 @@ else:
     fig_title = ' - '.join([site.upper(), name, date])
 
     # Data status plot
-    plot_df = qc_data.set_index('LineLocation', drop=True)
+    if qc_data['LineLocation'].isna().all():
+        plot_df = qc_data.set_index('TrackDistCum', drop=True)
+        fig_title += ' GARBAGE LINE LOCATION'
+    else:
+        plot_df = qc_data.set_index('LineLocation', drop=True)
     input_df = plot_df
     # Move origin points to x0, y0
     if plot_origin_flag:
@@ -77,6 +93,6 @@ else:
 
     plt.style.use('ggplot')
     fig = mt.io.plot.summary(plot_df)
-    fig.suptitle((' - '.join([site.upper(), name, date])))
+    fig.suptitle(fig_title)
     plt.savefig(fig_fp)
     plt.show()

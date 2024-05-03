@@ -14,9 +14,6 @@ logger = logging.getLogger(__name__)
 plot_origin_flag = True
 
 # Data filename
-qc_fp = '/mnt/data/UAF-data/working_a/SALVO/20240416-ARM/magnaprobe/salvo_arm_longline_magnaprobe-geo1_20240416.a2.csv'
-qc_fp = '/mnt/data/UAF-data/working_a/SALVO/20240418-BEO/magnaprobe/salvo_beo_longline_magnaprobe-geo2_20240418.a2.csv'
-qc_fp = '/mnt/data/UAF-data/working_a/SALVO/20240420-BEO/magnaprobe/salvo_beo_longline_magnaprobe-geodel_20240420.a2.csv'
 qc_fp = '/mnt/data/UAF-data/working_a/SALVO/20240421-ICE/magnaprobe/salvo_ice_library_magnaprobe-geodel_20240421.a2.csv'
 qc_data = mt.load.qc_data(qc_fp)
 
@@ -65,7 +62,7 @@ else:
 plt.style.use('ggplot')
 
 # Define figure subplots
-fig = mt.io.plot.summary(plot_df)
+fig = mt.io.plot.summary(plot_df, library=True)
 fig.suptitle((' - '.join([site.upper(), name, date])))
 
 plt.savefig(fig_fp)
