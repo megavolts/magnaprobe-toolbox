@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/magnaprobe-utils.iml" filepath="$PROJECT_DIR$/.idea/magnaprobe-utils.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../SALVO/pythonProject/.idea/pythonProject.iml" filepath="$PROJECT_DIR$/../SALVO/pythonProject/.idea/pythonProject.iml" />
     </modules>
   </component>
 </project>
