@@ -95,7 +95,7 @@ def calibration_check(raw_df, lower_cal=lower_cal, upper_cal=upper_cal):
     - Qulaity flag 'L': lower calibration point possible
 
     :param raw_df: pd.DataFrame()
-        Dataframe containing the raw data, with snow depth in m in column `Snowdepth`
+        Dataframe containing the raw data, with snow depth in m in column `SnowDepth`
     :param lower_cal: float, default 0.02 m
         Lower snow depth under which measurement could have been a lower calibration point
     :param upper_cal: float default 1.18 m
@@ -144,10 +144,25 @@ def direction_check(df, direction='EW'):
 
 
 def all_check(raw_df, direction=None, display=False, lower_cal=lower_cal, upper_cal=upper_cal):
-    raw_df = quality_check(raw_df, display=display)
-    raw_df = calibration_check(raw_df, lower_cal=lower_cal, upper_cal=upper_cal)
+    """
+    Perform quality, calibration and direction check when enable
+    :param raw_df: pd.DataFrame()
+        Input dataframe
+    :param direction: 'EW', 'WE', 'NS', 'SN'
+        Defined direction of transect.
+    :param display: boolean, default False
+         Display rows failing quality check
+    :param lower_cal: float, default 0.02 m
+        Lower snow depth in meter under which measurement could have been a lower calibration point
+    :param upper_cal: float default 1.18 m
+        Upper snow depth in meter above which measurement could have been an upper calibration point
+    :return output_df: pd.DataFrame()
+        Output dataframe
+    """
+    output_df = quality_check(raw_df, display=display)
+    output_df = calibration_check(output_df, lower_cal=lower_cal, upper_cal=upper_cal)
     if direction is not None:
-        rw_df = direction_check(raw_df, direction='EW')
+        output_df = direction_check(output_df, direction='EW')
     else:
         pass
-    return raw_df
+    return output_df

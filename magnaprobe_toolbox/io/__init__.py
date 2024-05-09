@@ -7,12 +7,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-col2remove_l = ['latitude_a', 'latitude_b', 'Longitude_a', 'Longitude_b', 'fix_quality',
-               'nmbr_satellites', 'HDOP', 'Altitude', 'LatitudeDDDDD', 'LongitudeDDDDD', 'month',
-               'Day', 'Hour', 'Minute', 'Second', 'Microsecond', 'DepthCm']
+col2remove_l = ['latitude_a', 'latitude_b', 'Longitude_a', 'Longitude_b', 'fix_quality', 'nmbr_satellites', 'Altitude', 'LatitudeDDDDD', 'LongitudeDDDDD', 'month', 'Day', 'Hour', 'Minute', 'Second', 'Microsecond', 'DepthCm']
 
-header_order = ['Record', 'Counter', 'Timestamp', 'SnowDepth', 'Latitude', 'Longitude', 'X', 'Y', 'Z', 'TrackDist',
-                'TrackDistCum', 'DistOrigin', 'LineLocation', 'Quality', 'Calibration', 'Battvolts']
+header_order = ['Record', 'Counter', 'Timestamp', 'SnowDepth', 'Latitude', 'Longitude', 'X', 'Y', 'Z', 'TrackDist', 'TrackDistCum', 'DistOrigin', 'LineLocation', 'Quality', 'Calibration', 'Battvolts', 'HDOP']
 
 lower_cal = 0.02  # m
 upper_cal = 1.18  # m

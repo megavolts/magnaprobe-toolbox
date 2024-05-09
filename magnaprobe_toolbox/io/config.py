@@ -1,4 +1,3 @@
-__name__ = 'magnaprobe-toolbox.io.config'
 __all__ = ['load']
 
 import logging
@@ -7,6 +6,7 @@ import yaml
 
 # Logger:
 logger = logging.getLogger(__name__)
+
 
 def load(input_fp):
     """
@@ -25,6 +25,7 @@ def load(input_fp):
         config = {}
 
     return config
+
 
 def save(config, input_fp, mode='w', display=True):
     """

@@ -20,4 +20,5 @@ def data(raw_df, out_fp, display=True, header_order=header_order, drop_header=Tr
     raw_df = raw_df[header_order]
     raw_df.to_csv(out_fp, index=False)
     if display:
-        print(out_fp)
+        print("File exported to " + out_fp)
+

@@ -5,6 +5,16 @@ from matplotlib import gridspec as gridspec
 
 from magnaprobe_toolbox import analysis
 from magnaprobe_toolbox.io import upper_cal, lower_cal
+
+def set_origin(plot_df, plot_from_origin=False):
+    if plot_from_origin:
+        plot_df["x0"] = plot_df["X"] - plot_df.iloc[0]["X"]
+        plot_df["y0"] = plot_df["Y"] - plot_df.iloc[0]["Y"]
+    else:
+        plot_df["x0"] = plot_df["X"]
+        plot_df["y0"] = plot_df["Y"]
+    return plot_df
+
 def stat_annotation(hs_stats, stat_l=['N', 'min', 'max', 'mean', 'std']):
     """
     :param hs_stats: pd.DataFrame()
