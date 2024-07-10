@@ -17,6 +17,9 @@ def basic(hs):
     if isinstance(hs, list):
         hs = np.array(hs)
 
+    # Remove negative value:
+    hs = hs[hs >= 0]
+
     # remove nan value
     hs_stats = {}
     hs_stats['N'] = len(hs)
@@ -29,9 +32,9 @@ def basic(hs):
     hs_stats['mean'] = np.mean(hs)
     hs_stats['med'] = np.median(hs)
     hs_stats['max'] = np.max(hs)
-    hs_stats['maxloc'] = np.where(hs == hs_stats['max'])[0]
+#    hs_stats['maxloc'] = np.where(hs == hs_stats['max'])[0]
     hs_stats['min'] = np.min(hs)
-    hs_stats['minloc'] = np.where(hs == hs_stats['min'])[0]
+#    hs_stats['minloc'] = np.where(hs == hs_stats['min'])[0]
     hs_stats['sdev'] = stats.tstd(hs)  # Standard deviation
     hs_stats['std'] = hs_stats['sdev']  # Standard deviation
     hs_stats['sigma'] = hs_stats['sdev']  # Standard deviation

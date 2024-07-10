@@ -10,15 +10,17 @@ def data(raw_df, out_fp, display=True, header_order=header_order, drop_header=Tr
     :param drop_header: boolean
         If True, drop any headers not in the list.
         If False, append existing headers not in the ordered header list after the header list.
-    :return:
+    :return export_df: pd.DataFrame()
+        Exported DataFrame
+
     """
     raw_df.columns = [c[0].upper() + c[1:] for c in raw_df.columns]
     if drop_header:
         header_order = [col for col in header_order if col in raw_df.columns]
     else:
         header_order = [col for col in header_order if col in raw_df.columns] + [col for col in raw_df.columns if col not in header_order]
-    raw_df = raw_df[header_order]
-    raw_df.to_csv(out_fp, index=False)
+    export_df = raw_df[header_order]
+    export_df.to_csv(out_fp, index=False)
     if display:
         print("File exported to " + out_fp)
-
+    return export_df

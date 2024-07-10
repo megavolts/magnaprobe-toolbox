@@ -5,6 +5,7 @@ from datetime import timedelta
 import logging
 from magnaprobe_toolbox.io import col2remove_l
 from magnaprobe_toolbox.io import lower_cal, upper_cal
+from magnaprobe_toolbox.analysis import distance
 import pandas as pd
 logger = logging.getLogger(__name__)
 
@@ -58,6 +59,14 @@ def quality_check(raw_df, display=False):
     # Too short time difference
     raw_df.loc[raw_df['Timestamp'].diff() < timedelta(0, 1), 'QC_flag'] = 9
 
+    # At least twice above median sampling frequency
+    frequency = raw_df.Timestamp.diff().median()
+    # Twice above median sampling frequency
+    raw_df.loc[frequency * 3 < raw_df.Timestamp.diff(), 'QC_flag'] = 9
+
+    # At least twice below median sampling frequency
+    raw_df.loc[raw_df.Timestamp.diff() < frequency /2, 'QC_flag'] = 8
+
     if display:
         display_quality_check(raw_df, [6, 7, 8])
 
@@ -106,7 +115,7 @@ def calibration_check(raw_df, lower_cal=lower_cal, upper_cal=upper_cal):
 
     """
     # Set Calibration column to None
-    raw_df['Calibration'] = None
+    raw_df['CalPoint'] = None
     # TODO: to be implemented
     # Look for lower calibration point
     raw_df.loc[raw_df['SnowDepth'] < lower_cal, 'CalPoint'] = 'L'
@@ -116,6 +125,15 @@ def calibration_check(raw_df, lower_cal=lower_cal, upper_cal=upper_cal):
     # Look for typical calibration pattern 'UL', 'LU', 'ULU', 'LUL', ...
 
     return raw_df
+
+def reorder(input_df, distance_type=None):
+    if distance_type is not None:
+        index_org_order = input_df.index
+        input_df.sort_values(by=[distance_type], inplace=True)
+
+        if not all(input_df.index == index_org_order) :
+            logger.warning('Transect point has been reordered according to ' + distance_type)
+    return input_df
 
 def direction_check(df, direction='EW'):
     """
@@ -129,21 +147,32 @@ def direction_check(df, direction='EW'):
     :return df: pd.DataFrame()
         Output Dataframe with the row reorder in direction of the transect
     """
-    if direction == 'EW' and  df.iloc[0]['Longitude'] < df.iloc[-1]['Longitude']:
-            df = df.iloc[::-1]
-    elif direction == 'WE' and  df.iloc[0]['Longitude'] > df.iloc[-1]['Longitude']:
-            df = df.iloc[::-1]
+    reverse_direction_flag = False
+    df.sort_values(by=['DistOrigin'])
+    if direction == 'EW' and df.iloc[0]['Longitude'] < df.iloc[-1]['Longitude']:
+        df = df.iloc[::-1]
+        reverse_direction_flag = True
+    elif direction == 'WE' and df.iloc[0]['Longitude'] > df.iloc[-1]['Longitude']:
+        df = df.iloc[::-1]
+        reverse_direction_flag = True
 
     if direction == 'NS' and df.iloc[0]['Latitude'] < df.iloc[-1]['Latitude']:
-            df = df.iloc[::-1]
+        df = df.iloc[::-1]
+        reverse_direction_flag = True
     elif direction == 'SN' and df.iloc[0]['Latitude'] > df.iloc[-1]['Latitude']:
-            df = df.iloc[::-1]
+        df = df.iloc[::-1]
+        reverse_direction_flag = True
+
+    df = distance.compute(df)
+
+    if reverse_direction_flag:
+        logger.warning('Transect has been reversed to match %s direction' % direction)
 
     return df
 
 
 
-def all_check(raw_df, direction=None, display=False, lower_cal=lower_cal, upper_cal=upper_cal):
+def all_check(raw_df, direction=None, display=False, distance_type=None, lower_cal=lower_cal, upper_cal=upper_cal):
     """
     Perform quality, calibration and direction check when enable
     :param raw_df: pd.DataFrame()
@@ -159,10 +188,12 @@ def all_check(raw_df, direction=None, display=False, lower_cal=lower_cal, upper_
     :return output_df: pd.DataFrame()
         Output dataframe
     """
-    output_df = quality_check(raw_df, display=display)
-    output_df = calibration_check(output_df, lower_cal=lower_cal, upper_cal=upper_cal)
+    output_df = raw_df
     if direction is not None:
-        output_df = direction_check(output_df, direction='EW')
+        output_df = direction_check(output_df, direction=direction)
     else:
         pass
+    output_df = reorder(output_df, distance_type=distance_type)
+    output_df = quality_check(output_df, display=display)
+    output_df = calibration_check(output_df, lower_cal=lower_cal, upper_cal=upper_cal)
     return output_df

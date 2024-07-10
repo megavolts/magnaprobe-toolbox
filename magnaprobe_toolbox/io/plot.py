@@ -28,9 +28,9 @@ def stat_annotation(hs_stats, stat_l=['N', 'min', 'max', 'mean', 'std']):
     for stat in stat_l:
         statval = hs_stats[stat]
         if stat in 'mu':
-            statstr += '$\mu$ =' + '%.2f\n' %statval
+            statstr += '$\\mu$ =' + '%.2f\n' %statval
         if stat in 'sigma':
-            statstr += '$\sigma$ =' + '%.2f\n' %statval
+            statstr += '$\\sigma$ =' + '%.2f\n' %statval
         if stat in ['N', 'npts']:
             statstr += '$N =$' + '%.0d\n' %statval
         else:
@@ -87,8 +87,6 @@ def summary(input_df, fig_fp=None, hist=True, sv_order=[0, 5, 20, 50], library='
         nrows += 1
         smooth_data, hs_vs = analysis.semivariogram.compute(input_df['SnowDepth'], [5, 20, 50])
 
-
-
     w_fig, h_fig = 8, 11
     fig = plt.figure(figsize=[w_fig, h_fig])
     gs1 = gridspec.GridSpec(4, ncols, height_ratios=[1]*4, width_ratios=[1])
@@ -105,17 +103,24 @@ def summary(input_df, fig_fp=None, hist=True, sv_order=[0, 5, 20, 50], library='
     ax[0, 0].set_ylabel('Snow Depth (m)')
     ax[0, 0].text(0.8, 0.9, statstr, bbox=statbox, transform=ax[0, 0].transAxes,
             fontsize=10, verticalalignment='top')
+    ax[0, 0].text(0.01, 0.05, 'East', transform=ax[0, 0].transAxes,
+            fontsize=10, verticalalignment='top')
+    ax[0, 0].text(0.99, 0.05, 'West', transform=ax[0, 0].transAxes,
+            fontsize=10, verticalalignment='top', horizontalalignment='right')
+
     ax[0, 0].set_xlim([0, input_df.index.max()])
+
+    ax[0, 0].invert_xaxis()
+
     ax[0, 0].set_ylim([0, 1.2])
 
-
     ax[1, 0].scatter(x0, y0, c=hs0)
-    if input_df['x0'][0] == 0 and input_df['y0'][0] == 0:
-        ax[1, 0].set_xlabel('X coordinate (m)')
-        ax[1, 0].set_ylabel('Y coordinate (m)')
+    if input_df.iloc[0]['x0'] == 0 and input_df.iloc[0]['y0'] == 0 == 0:
+        ax[1, 0].set_xlabel('Easting (m)')
+        ax[1, 0].set_ylabel('Northing (m)')
     else:
-        ax[1, 0].set_xlabel('UTM X coordinate (m)')
-        ax[1, 0].set_ylabel('UTM Y coordinate (m)')
+        ax[1, 0].set_xlabel('Easting (m)')
+        ax[1, 0].set_ylabel('Northing (m)')
     ax[1, 0].set_xlim([input_df['x0'].min(), input_df['x0'].max()])
 
     if np.diff(ax[1, 0].get_ylim()) < 200:
