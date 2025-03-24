@@ -7,8 +7,8 @@ The MagnaProbe is an automatic device design to measure both depth and position 
 ## Importation
 Raw MagnaProbe data is saved in a comma separated value table of the form ('.dat'):
 
-| TOA5 | 48066 | CR800 | 48066 | CR800.Std.32.05 | CPU:Probe48066-20140419.CR8 | 14760 | OperatorView |
-|------|-------|-------|-------|-----------------|-----------------------------|-------|--------------|
+| TOA5 | 48066 | CR800 | 48066 | CR800.Std.32.05 | CPU:Probe48066-20140419.CR8 | 14760 | OperatorView |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |  |
+|------|-------|-------|-------|-----------------|-----------------------------|-------|--------------|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|--|
 | TIMESTAMP | RECORD | Counter | DepthCm | BattVolts | latitude_a | latitude_b | Longitude_a | Longitude_b | fix_quality | nmbr_satellites | HDOP | altitudeB | DepthVolts | LatitudeDDDDD | LongitudeDDDDD | month | dayofmonth | hourofday | minutes | seconds | microseconds |
 | TS | RN |  |  |  | degrees | minutes | degrees | minutes | unitless |  |  |  |  |  |  |  |  |  |  |  |  |
 | 2024-06-07 13:22:57.28 | 14267 | 311000 | 119.3 | 13.71 | 71 | 20.9663 | -156 | -31.4397 | 2 | 11 | 0.7 | -1.2 | 7.601 | 0.3494383 | -0.523995 | 6 | 7 | 13 | 22 | 56 | 600000 |
